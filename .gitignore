@@ -1,0 +1,9 @@
+# Ignore virtual environment
+env/
+
+# Ignore credentials
+credentials.json
+
+# Bytecode and cache
+__pycache__/
+*.pyc
