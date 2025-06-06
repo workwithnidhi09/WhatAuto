@@ -10,55 +10,67 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
+import traceback
 
-# Google Sheets setup
+# Load Google Sheets
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
 client = gspread.authorize(creds)
-sheet = client.open("whatsapp-contact").sheet1
-data = sheet.get_all_records()
 
-# Selenium setup
+# Load campaign messages
+campaign_sheet = client.open("campaign_data_sheet").sheet1
+campaign_data = {row["Campaign ID"]: row["Message"] for row in campaign_sheet.get_all_records()}
+
+# Load user info
+user_sheet = client.open("user_data_sheet").sheet1
+users = user_sheet.get_all_records()
+
+# Setup Selenium
 options = Options()
 options.add_argument("--start-maximized")
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 # Open WhatsApp Web
-driver.get("https://web.whatsapp.com/")
-print("📷 Please scan the QR code in the browser. Waiting 30 seconds...")
-time.sleep(30)
+driver.get("https://web.whatsapp.com")
+print("Please scan the QR code to login...")
+time.sleep(60)
 
-# Loop through contacts
-# Loop through contacts
-for entry in data:
-    number = str(entry['Phone Number']).strip()
-    message = entry['Message']
-    encoded_message = quote(message)
+# Send messages
+for user in users:
+    name = user["Name"]
+    phone = str(user["Phone Number"]).strip()
+    campaign_id = user["Campaign ID"]
 
-    link = f"https://web.whatsapp.com/send?phone={number}&text={encoded_message}"
-    driver.get(link)
+    message_template = campaign_data.get(campaign_id, "")
+    if not message_template:
+        print(f"No message found for campaign ID: {campaign_id}")
+        continue
+
+    personalized_message = message_template.replace("{name}", name)
+    encoded_message = quote(personalized_message)
+    url = f"https://web.whatsapp.com/send?phone={phone}&text={encoded_message}"
+    driver.get(url)
 
     try:
-        # Wait for either the message box or the error to appear
         WebDriverWait(driver, 30).until(
             lambda d: d.find_elements(By.XPATH, '//div[@contenteditable="true"][@data-tab="10"]') or
                       d.find_elements(By.XPATH, '//*[contains(text(), "Phone number shared via url is invalid")]')
         )
 
         if driver.find_elements(By.XPATH, '//*[contains(text(), "Phone number shared via url is invalid")]'):
-            print(f" Number {number} is not on WhatsApp.")
+            print(f"❌ Number {phone} is not valid on WhatsApp.")
             continue
 
-        msg_box = driver.find_element(By.XPATH, '//div[@contenteditable="true"][@data-tab="10"]')
-        msg_box.send_keys(message)
-        msg_box.send_keys(Keys.ENTER)
-        print(f" Message sent to {number}")
-
+        send_btn = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.XPATH, '//span[@data-icon="send"]'))
+        )
+        send_btn.click()
+        print(f"✅ Message sent to {name} ({phone})")
+    
     except Exception as e:
-        print(f" Failed to send message to {number}: {e}")
-
+        print(f"❌ Failed to send message to {phone}. Error type: {type(e).__name__}")
+        traceback.print_exc()
     time.sleep(5)
 
-
-input(" Press Enter to close the browser manually...")
+input("Press Enter to exit and close browser...")
 driver.quit()
