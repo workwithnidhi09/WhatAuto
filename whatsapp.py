@@ -58,17 +58,17 @@ for user in users:
         )
 
         if driver.find_elements(By.XPATH, '//*[contains(text(), "Phone number shared via url is invalid")]'):
-            print(f"❌ Number {phone} is not valid on WhatsApp.")
+            print(f" Number {phone} is not valid on WhatsApp.")
             continue
 
         send_btn = WebDriverWait(driver, 20).until(
             EC.element_to_be_clickable((By.XPATH, '//span[@data-icon="send"]'))
         )
         send_btn.click()
-        print(f"✅ Message sent to {name} ({phone})")
+        print(f" Message sent to {name} ({phone})")
     
     except Exception as e:
-        print(f"❌ Failed to send message to {phone}. Error type: {type(e).__name__}")
+        print(f" Failed to send message to {phone}. Error type: {type(e).__name__}")
         traceback.print_exc()
     time.sleep(5)
 
