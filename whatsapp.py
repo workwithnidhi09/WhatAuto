@@ -52,7 +52,7 @@ for user in users:
     driver.get(url)
 
     try:
-        WebDriverWait(driver, 30).until(
+        WebDriverWait(driver, 60).until(
             lambda d: d.find_elements(By.XPATH, '//div[@contenteditable="true"][@data-tab="10"]') or
                       d.find_elements(By.XPATH, '//*[contains(text(), "Phone number shared via url is invalid")]')
         )
