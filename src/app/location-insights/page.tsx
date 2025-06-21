@@ -23,7 +23,6 @@ import { salesData, productList } from '@/data/mock-data';
 import type { LocationBasedInsightsOutput } from '@/ai/flows/location-based-insights';
 import { generateLocationInsightsAction } from '@/lib/actions';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import MapComponent from '@/components/map';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const formSchema = z.object({
@@ -31,27 +30,8 @@ const formSchema = z.object({
   productOfInterest: z.string().min(1, 'Product of interest is required.'),
 });
 
-type Location = {
-  key: string;
-  position: { lat: number; lng: number };
-  demand: string;
-};
-
-// Simple mock geocoder
-const geocode = (location: string): { lat: number; lng: number } => {
-  const locations: Record<string, { lat: number; lng: number }> = {
-    'New York, NY': { lat: 40.7128, lng: -74.006 },
-    'Brooklyn, NY': { lat: 40.6782, lng: -73.9442 },
-    'San Francisco, CA': { lat: 37.7749, lng: -122.4194 },
-    'Los Angeles, CA': { lat: 34.0522, lng: -118.2437 },
-    'Chicago, IL': { lat: 41.8781, lng: -87.6298 },
-  };
-  return locations[location] || { lat: 0, lng: 0 };
-};
-
 export default function LocationInsightsPage() {
   const [result, setResult] = useState<LocationBasedInsightsOutput | null>(null);
-  const [mapLocations, setMapLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -66,7 +46,6 @@ export default function LocationInsightsPage() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true);
     setResult(null);
-    setMapLocations([]);
 
     const response = await generateLocationInsightsAction(values);
 
@@ -78,12 +57,6 @@ export default function LocationInsightsPage() {
       });
     } else {
       setResult(response);
-      const locations = response.geographicAreas.map(area => ({
-        key: area.location,
-        position: geocode(area.location),
-        demand: area.demandLevel
-      }));
-      setMapLocations(locations);
     }
     setLoading(false);
   }
@@ -165,10 +138,6 @@ export default function LocationInsightsPage() {
                 <CardTitle>Generated Insights</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div>
-                  <h3 className="font-semibold mb-2">Demand Map</h3>
-                  <MapComponent locations={mapLocations} />
-                </div>
                  <div>
                     <h3 className="font-semibold mb-2">Overall Summary</h3>
                     <p className="text-sm text-muted-foreground">{result.overallSummary}</p>
