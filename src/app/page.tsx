@@ -1,3 +1,6 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { Activity, BarChart, DollarSign, Users } from 'lucide-react';
 import {
   Card,
@@ -23,15 +26,6 @@ import { Bar, BarChart as RechartsBarChart, XAxis, YAxis } from 'recharts';
 import { salesData } from '@/data/mock-data';
 import PageHeader from '@/components/page-header';
 
-const chartData = [
-  { month: 'January', total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: 'February', total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: 'March', total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: 'April', total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: 'May', total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: 'June', total: Math.floor(Math.random() * 5000) + 1000 },
-];
-
 const chartConfig = {
   total: {
     label: 'Total',
@@ -40,6 +34,19 @@ const chartConfig = {
 };
 
 export default function DashboardPage() {
+  const [chartData, setChartData] = useState<any[]>([]);
+
+  useEffect(() => {
+    setChartData([
+      { month: 'January', total: Math.floor(Math.random() * 5000) + 1000 },
+      { month: 'February', total: Math.floor(Math.random() * 5000) + 1000 },
+      { month: 'March', total: Math.floor(Math.random() * 5000) + 1000 },
+      { month: 'April', total: Math.floor(Math.random() * 5000) + 1000 },
+      { month: 'May', total: Math.floor(Math.random() * 5000) + 1000 },
+      { month: 'June', total: Math.floor(Math.random() * 5000) + 1000 },
+    ]);
+  }, []);
+
   const totalRevenue = salesData.reduce((acc, sale) => acc + sale.price * sale.quantity_sold, 0);
   const totalSales = salesData.reduce((acc, sale) => acc + sale.quantity_sold, 0);
 
