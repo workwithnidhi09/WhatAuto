@@ -137,7 +137,7 @@ export default function DashboardPage() {
               </TableHeader>
               <TableBody>
                 {salesData.slice(0, 6).map((sale) => (
-                  <TableRow key={sale.transaction_id}>
+                  <TableRow key={`${sale.transaction_id}-${sale.product_id}`}>
                     <TableCell>
                       <div className="font-medium">{sale.product_name}</div>
                       <div className="hidden text-sm text-muted-foreground md:inline">
