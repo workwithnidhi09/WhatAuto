@@ -3,7 +3,6 @@
 
 import {
   LayoutDashboard,
-  Lightbulb,
   LocateFixed,
   MapPin,
   Megaphone,
@@ -19,7 +18,6 @@ import {
 
 const navItems = [
   { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/product-insights', icon: Lightbulb, label: 'Product Insights' },
   { href: '/placement-suggestions', icon: LocateFixed, label: 'Placement Suggestions' },
   { href: '/location-insights', icon: MapPin, label: 'Location Insights' },
   { href: '/offer-optimization', icon: Megaphone, label: 'Offer Optimization' },
